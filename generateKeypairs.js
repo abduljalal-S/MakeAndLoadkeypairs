@@ -1,10 +1,20 @@
-import { getKeypairFromEnvironment } from "@solana-developers/helpers";
-import { Keypair } from "@solana/web3.js";
-import "dotenv/config";
+const { Keypair } = require('@solana/web3.js');
+const fs = require('fs');
 
-const keypair = Keypair.generate();
+// Step 1: Generate a new keypair
+const newKeypair = Keypair.generate();
+console.log('Generated Public Key:', newKeypair.publicKey.toString());
 
-console.log(`The public key is: `, keypair.publicKey.toBase58());
-console.log(`The secret key is: `, keypair.secretKey);
+// Step 2: Save it to a file
+const keypairData = {
+  publicKey: newKeypair.publicKey.toString(),
+  secretKey: Buffer.from(newKeypair.secretKey).toString('base64')
+};
+fs.writeFileSync('keypair.json', JSON.stringify(keypairData));
+console.log('Keypair saved to keypair.json');
 
-function keypair = getKeypairFromEnvironment("SECRET_KEY");
+// Step 3: Load it back
+const loadedData = JSON.parse(fs.readFileSync('keypair.json', 'utf8'));
+const secretKey = Buffer.from(loadedData.secretKey, 'base64');
+const loadedKeypair = Keypair.fromSecretKey(secretKey);
+console.log('Loaded Public Key:', loadedKeypair.publicKey.toString());
